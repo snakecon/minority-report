@@ -15,12 +15,12 @@ SECRET_KEY = ''
 PROXYS = {}
 WINDOW_ID = ''
 # BBox: left, top, right, down
-BBOX = (0, 250, 550, 540)
+BBOX = (38, 211, 520, 658)
 # Posion: x, y
 ANS_POSITION = [
-    (270, 359),
-    (270, 379),
-    (270, 399),
+    (551, 723),
+    (551, 896),
+    (551, 1091),
 ]
 
 
@@ -47,6 +47,7 @@ def ocr(file_name):
 
     corp_img = im.crop(BBOX)
 
+    corp_img.save('debug.png')
     corp_img.save(img_bytes, format='PNG')
 
     client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
@@ -149,7 +150,7 @@ def touch_button(result_index):
     print ''
     ans_position = ANS_POSITION[result_index]
     print "Touch button index:%s, position: %s " % (result_index, str(ans_position))
-    print ("adb shell input tap %s %s" % tuple(ans_position))
+    call(["adb", "shell", "input", "tap", str(ans_position[0]), str(ans_position[1])])
     print ''
 
 

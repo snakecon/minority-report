@@ -6,5 +6,5 @@ do
     python main.py
     echo "======================================="
     echo ""
-    sleep 5
+    sleep 0.2s
 done
