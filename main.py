@@ -1,9 +1,10 @@
 # coding=utf-8
-import os
+import io
 import urllib
 from subprocess import call
 
 import requests
+from PIL import Image
 from aip import AipOcr
 from bs4 import BeautifulSoup
 
@@ -12,7 +13,15 @@ APP_ID = ''
 API_KEY = ''
 SECRET_KEY = ''
 PROXYS = {}
-SCREEN_BBOX = ""
+WINDOW_ID = ''
+# BBox: left, top, right, down
+BBOX = (0, 250, 550, 540)
+# Posion: x, y
+ANS_POSITION = [
+    (270, 359),
+    (270, 379),
+    (270, 399),
+]
 
 
 def main():
@@ -22,25 +31,26 @@ def main():
     question_block = ocr(filename)
     print_questions(question_block)
     results = rank_answers(question_block)
-    print_answers(results)
+    index = print_answers(results)
+    touch_button(index)
 
 
-def screenshot(img_name):
-    print "grabbing screenshot..."
-    call(["screencapture", "-R", SCREEN_BBOX, img_name])
-    call(["sips", "-Z", "350", img_name])
+def screenshot(file_name):
+    print "Grabbing screenshot..."
+    call(["screencapture", "-l", WINDOW_ID, "-o", file_name])
 
 
-def ocr(img_name):
-    print "running OCR..."
-    file_name = os.path.join(os.path.dirname(__file__), img_name)
+def ocr(file_name):
+    print "Running OCR..."
+    im = Image.open(file_name)
+    img_bytes = io.BytesIO()
 
-    image = _get_file_content(file_name)
+    corp_img = im.crop(BBOX)
 
-    options = {"probability": "true"}
+    corp_img.save(img_bytes, format='PNG')
 
     client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
-    result = client.basicGeneral(image, options)
+    result = client.basicGeneral(img_bytes.getvalue(), {"probability": "true"})
 
     lines = result['words_result']
 
@@ -71,7 +81,7 @@ def print_questions(question_block):
 
 
 def rank_answers(question_block):
-    print "rankings answers..."
+    print "Rankings answers..."
 
     question = question_block["question"]
     ans_1 = question_block["ans_1"]
@@ -80,8 +90,8 @@ def rank_answers(question_block):
 
     reverse = True
 
-    if "不是" in question.lower():
-        print "reversing results..."
+    if "不是" in question.lower() or "不可能" in question.lower():
+        print "Reversing results..."
         reverse = False
 
     text = _google([question], 50)
@@ -102,7 +112,7 @@ def rank_answers(question_block):
 
     # If there's a tie redo with answers in q
     if sorted_results[0]["count"] == sorted_results[1]["count"]:
-        print "running tiebreaker..."
+        print "Running tiebreaker..."
 
         text = _google([question, ans_1, ans_2, ans_3], 50)
 
@@ -120,15 +130,26 @@ def print_answers(results):
     small = min(results, key=lambda x: x["count"])
     large = max(results, key=lambda x: x["count"])
 
+    result_index = 0
     for (i, r) in enumerate(results):
         text = "%s. %s - %s" % (i, r["ans"], r["count"])
 
         if r["ans"] == large["ans"]:
             print Colors.green + text + Colors.end
+            result_index = i
         elif r["ans"] == small["ans"]:
             print Colors.red + text + Colors.end
         else:
             print text
+    print ''
+    return result_index
+
+
+def touch_button(result_index):
+    print ''
+    ans_position = ANS_POSITION[result_index]
+    print "Touch button index:%s, position: %s " % (result_index, str(ans_position))
+    print ("adb shell input tap %s %s" % tuple(ans_position))
     print ''
 
 
@@ -138,11 +159,6 @@ class Colors:
     green = '\033[0;32m'
     end = '\033[0m'
     bold = '\033[1m'
-
-
-def _get_file_content(file_path):
-    with open(file_path, 'rb') as fp:
-        return fp.read()
 
 
 def _google(q_list, num):
