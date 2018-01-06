@@ -30,7 +30,7 @@ class Pipeline(object):
 
     def run(self):
         try:
-            filename = 'q.png'
+            filename = self.flags.precog + '.png'
             self.driver.screenshot(filename)
 
             questions = self.ocr.ocr(filename)
