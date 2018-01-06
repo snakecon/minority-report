@@ -21,12 +21,12 @@ __author__ = 'snakecon@gmail.com'
 
 class Pipeline(object):
 
-    def __init__(self, debug=False):
-        self.debug = debug
-        self.ranker = BasicRanker(debug)
-        self.driver = AndroidDriver(debug)
-        self.ocr = BaiduClondOcr(debug)
-        self.recognizer = HistSceneRecognizer(debug)
+    def __init__(self, flags):
+        self.flags = flags
+        self.ranker = BasicRanker(flags)
+        self.driver = AndroidDriver(flags)
+        self.ocr = BaiduClondOcr(flags)
+        self.recognizer = HistSceneRecognizer(flags)
 
     def run(self):
         try:
@@ -37,7 +37,8 @@ class Pipeline(object):
 
             result_index = self.ranker.rank_answers(questions)
 
-            self.driver.touch_button(result_index)
+            if self.flags.touch:
+                self.driver.touch_button(result_index)
         except PipelineException as e:
             print e.message
             if e.payload is not None:

@@ -22,14 +22,14 @@ class Scene(object):
 
 
 class HistSceneRecognizer(object):
-    def __init__(self, debug):
-        self.debug = debug
+    def __init__(self, flags):
+        self.flags = flags
         self.target_img = Image.open('data/target.png')
         self.target_hist = self.target_img.histogram()
         self.threshold = 0.6
 
     def recogize(self, dst_img):
-        if self.debug:
+        if self.flags.debug:
             print dst_img.histogram()
             print self.target_hist
 

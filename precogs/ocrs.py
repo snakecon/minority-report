@@ -25,9 +25,9 @@ __author__ = 'snakecon@gmail.com'
 
 class BaiduClondOcr(object):
 
-    def __init__(self, debug):
-        self.debug = debug
-        self.recognizer = HistSceneRecognizer(debug)
+    def __init__(self, flags):
+        self.flags = flags
+        self.recognizer = HistSceneRecognizer(flags)
 
     def ocr(self, file_name):
         print "Running OCR..."
@@ -36,8 +36,7 @@ class BaiduClondOcr(object):
 
         corp_img = im.crop(conf.BBOX)
 
-        if self.debug:
-            corp_img.save('q_corp.png')
+        corp_img.save('q_corp.png')
         corp_img.save(img_bytes, format='PNG')
 
         scene = self.recognizer.recogize(corp_img)

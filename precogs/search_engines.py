@@ -27,8 +27,8 @@ class SearchEngine(object):
 
 
 class BaiduWireless(SearchEngine):
-    def __init__(self, debug):
-        self.debug = debug
+    def __init__(self, flags):
+        self.flags = flags
 
     def search(self, q_list, num):
         params = {"word": " ".join(q_list), "num": num}
@@ -37,7 +37,7 @@ class BaiduWireless(SearchEngine):
         baidu_url = "https://m.baidu.com/s?" + url_params
 
         r = requests.get(baidu_url)
-        if self.debug:
+        if self.flags.debug:
             print r.text
 
         soup = BeautifulSoup(r.text, "html.parser")
@@ -49,8 +49,8 @@ class BaiduWireless(SearchEngine):
 
 
 class Google(SearchEngine):
-    def __init__(self, debug):
-        self.debug = debug
+    def __init__(self, flags):
+        self.flags = flags
 
     def search(self, q_list, num):
         params = {"q": " ".join(q_list), "num": num}
@@ -59,7 +59,7 @@ class Google(SearchEngine):
         google_url = "https://www.google.com.hk/search?" + url_params
 
         r = requests.get(google_url, proxies=conf.PROXYS)
-        if self.debug:
+        if self.flags.debug:
             print r.text
 
         soup = BeautifulSoup(r.text, "html.parser")
@@ -71,8 +71,8 @@ class Google(SearchEngine):
 
 
 class Bing(SearchEngine):
-    def __init__(self, debug):
-        self.debug = debug
+    def __init__(self, flags):
+        self.flags = flags
 
     def search(self, q_list, num):
         params = {"q": " ".join(q_list), "num": num}
@@ -81,7 +81,7 @@ class Bing(SearchEngine):
         bing_url = "https://cn.bing.com/search?" + url_params
 
         r = requests.get(bing_url)
-        if self.debug:
+        if self.flags.debug:
             print r.text
 
         soup = BeautifulSoup(r.text, "html.parser")

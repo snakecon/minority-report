@@ -17,12 +17,12 @@ __author__ = 'snakecon@gmail.com'
 
 
 class AndroidDriver(object):
-    def __init__(self, debug):
-        self.debug = debug
+    def __init__(self, flags):
+        self.flags = flags
 
     def screenshot(self, file_name):
         print "Grabbing screenshot..."
-        if self.debug:
+        if self.flags.debug:
             print(' '.join(["screencapture", "-l", str(conf.WINDOW_ID), "-o", file_name]))
         call(["screencapture", "-l", str(conf.WINDOW_ID), "-o", file_name])
 

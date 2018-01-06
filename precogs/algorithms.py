@@ -9,6 +9,9 @@ The algorithm module, used for preprocess text and ranking answers.
 
 Authors: Snakecon (snakecon@gmail.com)
 """
+from precogs.exceptions import PipelineException
+from precogs.search_engines import BaiduWireless
+from precogs.search_engines import Bing
 from precogs.search_engines import Google
 
 __author__ = 'snakecon@gmail.com'
@@ -23,9 +26,18 @@ class Colors:
 
 
 class BasicRanker(object):
-    def __init__(self, debug):
-        self.debug = debug
-        self.search_engine = Google(debug)
+    def __init__(self, flags):
+        self.flags = flags
+        precog = self.flags.precog.lower()
+        if precog == "agatha":
+            self.search_engine = Google(flags)
+        elif precog == "arthur":
+            self.search_engine = Bing(flags)
+        elif precog == "dash":
+            self.search_engine = BaiduWireless(flags)
+        else:
+            raise PipelineException("Invalid precog", precog)
+
         self.cache = {}
 
     def rank_answers(self, question_block):
