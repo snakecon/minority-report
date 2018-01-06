@@ -14,7 +14,7 @@ function auto()
     do
         echo ""
         echo "====================HQ================="
-        time python src/main.py
+        time python main.py
         echo "======================================="
         echo ""
         sleep 0.2s
