@@ -9,7 +9,7 @@ The algorithm module, used for preprocess text and ranking answers.
 
 Authors: Snakecon (snakecon@gmail.com)
 """
-from precogs.search_engines import Google
+from precogs.search_engines import Bing
 
 __author__ = 'snakecon@gmail.com'
 
@@ -25,7 +25,7 @@ class Colors:
 class BasicRanker(object):
     def __init__(self, debug):
         self.debug = debug
-        self.google = Google(debug)
+        self.search_engine = Bing(debug)
 
     def rank_answers(self, question_block):
         print "Rankings answers..."
@@ -41,7 +41,7 @@ class BasicRanker(object):
             print "Reversing results..."
             reverse = False
 
-        text = self.google.search([question], 50)
+        text = self.search_engine.search([question], 50)
 
         results = [
             {"ans": ans_1, "count": text.count(ans_1)},
@@ -61,7 +61,7 @@ class BasicRanker(object):
         if sorted_results[0]["count"] == sorted_results[1]["count"]:
             print "Running tiebreaker..."
 
-            text = self.google.search([question, ans_1, ans_2, ans_3], 50)
+            text = self.search_engine.search([question, ans_1, ans_2, ans_3], 50)
 
             results = [
                 {"ans": ans_1, "count": text.count(ans_1)},

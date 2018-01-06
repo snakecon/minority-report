@@ -26,12 +26,26 @@ class SearchEngine(object):
         pass
 
 
-class Baidu(SearchEngine):
+class BaiduWireless(SearchEngine):
     def __init__(self, debug):
         self.debug = debug
 
     def search(self, q_list, num):
-        pass
+        params = {"word": " ".join(q_list), "num": num}
+        url_params = urllib.urlencode(params)
+
+        baidu_url = "https://m.baidu.com/s?" + url_params
+
+        r = requests.get(baidu_url)
+        if self.debug:
+            print r.text
+
+        soup = BeautifulSoup(r.text, "html.parser")
+        spans = soup.find_all('div', {'class': 'c-row'})
+
+        text = u" ".join([span.get_text() for span in spans]).lower().encode('utf-8').strip()
+
+        return text
 
 
 class Google(SearchEngine):
@@ -64,7 +78,7 @@ class Bing(SearchEngine):
         params = {"q": " ".join(q_list), "num": num}
         url_params = urllib.urlencode(params)
 
-        bing_url = "https://cn.bing.com/search?q=" + url_params
+        bing_url = "https://cn.bing.com/search?" + url_params
 
         r = requests.get(bing_url)
         if self.debug:
@@ -78,5 +92,5 @@ class Bing(SearchEngine):
         return text
 
 if __name__ == "__main__":
-    bing = Bing(False)
-    print bing.search(["华盛顿是哪一年去世的"], 10)
+    baidu = BaiduWireless(False)
+    print baidu.search(["华盛顿是哪一年出生的"], 10)
