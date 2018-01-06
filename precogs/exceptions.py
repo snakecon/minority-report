@@ -13,7 +13,7 @@ Authors: Snakecon (snakecon@gmail.com)
 __author__ = 'snakecon@gmail.com'
 
 
-class PipelineException(object):
+class PipelineException(BaseException):
     def __init__(self, message="Unknown message", payload=None):
         self.message = message
         self.payload = payload

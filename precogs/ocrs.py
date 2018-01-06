@@ -17,7 +17,7 @@ from aip import AipOcr
 from precogs import conf
 from precogs.exceptions import PipelineException
 from precogs.scenes import Scene
-from precogs.scenes import SceneRecognizer
+from precogs.scenes import HistSceneRecognizer
 
 
 __author__ = 'snakecon@gmail.com'
@@ -27,7 +27,7 @@ class BaiduClondOcr(object):
 
     def __init__(self, debug):
         self.debug = debug
-        self.recognizer = SceneRecognizer(debug)
+        self.recognizer = HistSceneRecognizer(debug)
 
     def ocr(self, file_name):
         print "Running OCR..."

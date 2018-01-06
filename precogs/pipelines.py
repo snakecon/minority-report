@@ -14,7 +14,7 @@ from precogs.algorithms import BasicRanker
 from precogs.drivers import AndroidDriver
 from precogs.exceptions import PipelineException
 from precogs.ocrs import BaiduClondOcr
-from precogs.scenes import SceneRecognizer
+from precogs.scenes import HistSceneRecognizer
 
 __author__ = 'snakecon@gmail.com'
 
@@ -26,12 +26,11 @@ class Pipeline(object):
         self.ranker = BasicRanker(debug)
         self.driver = AndroidDriver(debug)
         self.ocr = BaiduClondOcr(debug)
-        self.recognizer = SceneRecognizer(debug)
+        self.recognizer = HistSceneRecognizer(debug)
 
     def run(self):
-        filename = 'q.png'
-
         try:
+            filename = 'q.png'
             self.driver.screenshot(filename)
 
             questions = self.ocr.ocr(filename)

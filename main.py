@@ -15,5 +15,5 @@ __author__ = 'snakecon@gmail.com'
 
 
 if __name__ == '__main__':
-    pipeline = pipelines.Pipeline()
+    pipeline = pipelines.Pipeline(False)
     pipeline.run()
