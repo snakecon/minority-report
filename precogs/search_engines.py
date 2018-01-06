@@ -61,4 +61,22 @@ class Bing(SearchEngine):
         self.debug = debug
 
     def search(self, q_list, num):
-        pass
+        params = {"q": " ".join(q_list), "num": num}
+        url_params = urllib.urlencode(params)
+
+        bing_url = "https://cn.bing.com/search?q=" + url_params
+
+        r = requests.get(bing_url)
+        if self.debug:
+            print r.text
+
+        soup = BeautifulSoup(r.text, "html.parser")
+        spans = soup.find_all('div', {'class': 'b_caption'})
+
+        text = u" ".join([span.get_text() for span in spans]).lower().encode('utf-8').strip()
+
+        return text
+
+if __name__ == "__main__":
+    bing = Bing(False)
+    print bing.search(["华盛顿是哪一年去世的"], 10)
