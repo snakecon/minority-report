@@ -9,7 +9,7 @@ The algorithm module, used for preprocess text and ranking answers.
 
 Authors: Snakecon (snakecon@gmail.com)
 """
-from precogs.search_engines import Bing
+from precogs.search_engines import Google
 
 __author__ = 'snakecon@gmail.com'
 
@@ -25,7 +25,8 @@ class Colors:
 class BasicRanker(object):
     def __init__(self, debug):
         self.debug = debug
-        self.search_engine = Bing(debug)
+        self.search_engine = Google(debug)
+        self.cache = {}
 
     def rank_answers(self, question_block):
         print "Rankings answers..."
@@ -37,11 +38,14 @@ class BasicRanker(object):
 
         reverse = True
 
-        if "不是" in question.lower() or "不可能" in question.lower():
+        if "不是" in question.lower()\
+                or "不可能" in question.lower()\
+                or "不包含" in question.lower()\
+                or "不属于" in question.lower():
             print "Reversing results..."
             reverse = False
 
-        text = self.search_engine.search([question], 50)
+        text = self._serach_with_cache([question], 50)
 
         results = [
             {"ans": ans_1, "count": text.count(ans_1)},
@@ -61,7 +65,7 @@ class BasicRanker(object):
         if sorted_results[0]["count"] == sorted_results[1]["count"]:
             print "Running tiebreaker..."
 
-            text = self.search_engine.search([question, ans_1, ans_2, ans_3], 50)
+            text = self._serach_with_cache([question, ans_1, ans_2, ans_3], 50)
 
             results = [
                 {"ans": ans_1, "count": text.count(ans_1)},
@@ -69,10 +73,10 @@ class BasicRanker(object):
                 {"ans": ans_3, "count": text.count(ans_3)}
             ]
 
-        result_index = self.print_answers(results)
+        result_index = self.print_answers(results, reverse)
         return result_index
 
-    def print_answers(self, results):
+    def print_answers(self, results, reverse):
         print ''
         small = min(results, key=lambda x: x["count"])
         large = max(results, key=lambda x: x["count"])
@@ -83,10 +87,24 @@ class BasicRanker(object):
 
             if r["ans"] == large["ans"]:
                 print Colors.green + text + Colors.end
-                result_index = i
+                if reverse:
+                    result_index = i
             elif r["ans"] == small["ans"]:
                 print Colors.red + text + Colors.end
+                if not reverse:
+                    result_index = i
             else:
                 print text
         print ''
         return result_index
+
+    def _serach_with_cache(self, q_list, num):
+        cache_key = " ".join(q_list)
+        if cache_key in self.cache:
+            print "Cache hit, key: %s" % cache_key
+            return self.cache[cache_key]
+
+        result = self.search_engine.search(q_list, num)
+        self.cache[cache_key] = result
+
+        return result

@@ -11,6 +11,8 @@ Authors: Snakecon (snakecon@gmail.com)
 """
 from PIL import Image
 
+from precogs.algorithms import Colors
+
 __author__ = 'snakecon@gmail.com'
 
 
@@ -32,7 +34,8 @@ class HistSceneRecognizer(object):
             print self.target_hist
 
         similar = self._hist_similar(dst_img.histogram(), self.target_hist)
-        print "Scene similar: %f" % similar
+
+        print Colors.blue + "Scene similar: %f" % similar + Colors.end
 
         if similar > self.threshold:
             return Scene.PUZZLE

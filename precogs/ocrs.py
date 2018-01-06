@@ -66,6 +66,9 @@ class BaiduClondOcr(object):
             "ans_3": ans_3.replace('c.', ''),
         }
 
+        if len(lines) > 3:
+            raise PipelineException('Invalid ocr', question_block)
+
         self.print_questions(question_block)
         return question_block
 
