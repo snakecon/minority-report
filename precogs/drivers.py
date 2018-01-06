@@ -22,6 +22,8 @@ class AndroidDriver(object):
 
     def screenshot(self, file_name):
         print "Grabbing screenshot..."
+        if self.debug:
+            print(' '.join(["screencapture", "-l", str(conf.WINDOW_ID), "-o", file_name]))
         call(["screencapture", "-l", str(conf.WINDOW_ID), "-o", file_name])
 
     def touch_button(self, result_index):
