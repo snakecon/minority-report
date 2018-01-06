@@ -1,4 +1,14 @@
 # coding=utf-8
+#########################################################
+#
+# Copyright 2018 The minority-report Authors. All Rights Reserved
+#
+#########################################################
+"""
+The entry point.
+
+Authors: Snakecon (snakecon@gmail.com)
+"""
 import io
 import urllib
 from subprocess import call
@@ -8,20 +18,9 @@ from PIL import Image
 from aip import AipOcr
 from bs4 import BeautifulSoup
 
-# Config.
-APP_ID = ''
-API_KEY = ''
-SECRET_KEY = ''
-PROXYS = {}
-WINDOW_ID = ''
-# BBox: left, top, right, down
-BBOX = (38, 211, 520, 658)
-# Posion: x, y
-ANS_POSITION = [
-    (551, 723),
-    (551, 896),
-    (551, 1091),
-]
+import conf_air as conf
+
+__author__ = 'snakecon@gmail.com'
 
 
 def main():
@@ -37,7 +36,7 @@ def main():
 
 def screenshot(file_name):
     print "Grabbing screenshot..."
-    call(["screencapture", "-l", WINDOW_ID, "-o", file_name])
+    call(["screencapture", "-l", str(conf.WINDOW_ID), "-o", file_name])
 
 
 def ocr(file_name):
@@ -45,12 +44,12 @@ def ocr(file_name):
     im = Image.open(file_name)
     img_bytes = io.BytesIO()
 
-    corp_img = im.crop(BBOX)
+    corp_img = im.crop(conf.BBOX)
 
     corp_img.save('debug.png')
     corp_img.save(img_bytes, format='PNG')
 
-    client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
+    client = AipOcr(conf.APP_ID, conf.API_KEY, conf.SECRET_KEY)
     result = client.basicGeneral(img_bytes.getvalue(), {"probability": "true"})
 
     lines = result['words_result']
@@ -148,7 +147,7 @@ def print_answers(results):
 
 def touch_button(result_index):
     print ''
-    ans_position = ANS_POSITION[result_index]
+    ans_position = conf.ANS_POSITION[result_index]
     print "Touch button index:%s, position: %s " % (result_index, str(ans_position))
     call(["adb", "shell", "input", "tap", str(ans_position[0]), str(ans_position[1])])
     print ''
@@ -168,7 +167,7 @@ def _google(q_list, num):
 
     google_url = "https://www.google.com.hk/search?" + url_params
 
-    r = requests.get(google_url, proxies=PROXYS)
+    r = requests.get(google_url, proxies=conf.PROXYS)
 
     soup = BeautifulSoup(r.text, "html.parser")
     spans = soup.find_all('span', {'class': 'st'})
