@@ -15,7 +15,7 @@ from PIL import Image
 from aip import AipOcr
 
 from precogs import conf
-from precogs.pipelines import PipelineException
+from precogs.exceptions import PipelineException
 from precogs.scenes import Scene
 from precogs.scenes import SceneRecognizer
 
