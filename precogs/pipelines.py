@@ -13,10 +13,15 @@ Authors: Snakecon (snakecon@gmail.com)
 from precogs.algorithms import BasicRanker
 from precogs.drivers import AndroidDriver
 from precogs.ocrs import BaiduClondOcr
-from precogs.scenes import Scene
 from precogs.scenes import SceneRecognizer
 
 __author__ = 'snakecon@gmail.com'
+
+
+class PipelineException(object):
+    def __init__(self, message="Unknown message", payload=None):
+        self.message = message
+        self.payload = payload
 
 
 class Pipeline(object):
@@ -30,14 +35,16 @@ class Pipeline(object):
 
     def run(self):
         filename = 'q.png'
-        self.driver.screenshot(filename)
 
-        scene = self.recognizer.recogize(filename)
-        if scene == Scene.OTHER:
-            return
+        try:
+            self.driver.screenshot(filename)
 
-        questions = self.ocr.ocr(filename)
+            questions = self.ocr.ocr(filename)
 
-        result_index = self.ranker.rank_answers(questions)
+            result_index = self.ranker.rank_answers(questions)
 
-        self.driver.touch_button(result_index)
+            self.driver.touch_button(result_index)
+        except PipelineException as e:
+            print e.message
+            if e.payload is not None:
+                print e.payload

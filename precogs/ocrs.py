@@ -15,6 +15,10 @@ from PIL import Image
 from aip import AipOcr
 
 from precogs import conf
+from precogs.pipelines import PipelineException
+from precogs.scenes import Scene
+from precogs.scenes import SceneRecognizer
+
 
 __author__ = 'snakecon@gmail.com'
 
@@ -23,6 +27,7 @@ class BaiduClondOcr(object):
 
     def __init__(self, debug):
         self.debug = debug
+        self.recognizer = SceneRecognizer(debug)
 
     def ocr(self, file_name):
         print "Running OCR..."
@@ -34,6 +39,10 @@ class BaiduClondOcr(object):
         if self.debug:
             corp_img.save('q_corp.png')
         corp_img.save(img_bytes, format='PNG')
+
+        scene = self.recognizer.recogize(corp_img)
+        if scene == Scene.OTHER:
+            raise PipelineException('Other scene')
 
         client = AipOcr(conf.APP_ID, conf.API_KEY, conf.SECRET_KEY)
         result = client.basicGeneral(img_bytes.getvalue(), {"probability": "true"})
