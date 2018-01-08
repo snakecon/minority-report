@@ -40,7 +40,7 @@ class BaiduWireless(SearchEngine):
         if self.flags.debug:
             print r.text
 
-        soup = BeautifulSoup(r.text, "html.parser")
+        soup = BeautifulSoup(r.text, "lxml")
         spans = soup.find_all('div', {'class': 'c-row'})
 
         text = u" ".join([span.get_text() for span in spans]).lower().encode('utf-8').strip()
@@ -62,7 +62,7 @@ class Google(SearchEngine):
         if self.flags.debug:
             print r.text
 
-        soup = BeautifulSoup(r.text, "html.parser")
+        soup = BeautifulSoup(r.text, "lxml")
         spans = soup.find_all('span', {'class': 'st'})
 
         text = u" ".join([span.get_text() for span in spans]).lower().encode('utf-8').strip()
@@ -84,7 +84,7 @@ class Bing(SearchEngine):
         if self.flags.debug:
             print r.text
 
-        soup = BeautifulSoup(r.text, "html.parser")
+        soup = BeautifulSoup(r.text, "lxml")
         spans = soup.find_all('div', {'class': 'b_caption'})
 
         text = u" ".join([span.get_text() for span in spans]).lower().encode('utf-8').strip()
