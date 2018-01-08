@@ -98,13 +98,17 @@ class BasicRanker(object):
             text = "%s. %s - %s" % (i, r["ans"], r["count"])
 
             if r["ans"] == large["ans"]:
-                print Colors.green + text + Colors.end
+                color = Colors.green
                 if reverse:
                     result_index = i
+                    color = Colors.red
+                print color + text + Colors.end
             elif r["ans"] == small["ans"]:
-                print Colors.red + text + Colors.end
+                color = Colors.red
                 if not reverse:
+                    color = Colors.green
                     result_index = i
+                print color + text + Colors.end
             else:
                 print text
         print ''
