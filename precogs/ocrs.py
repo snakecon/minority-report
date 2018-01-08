@@ -57,9 +57,9 @@ class BaiduClondOcr(object):
         del lines[-1]
         del lines[-1]
 
-        question = u" ".join([line['words'].strip() for line in lines]).encode('utf-8')
+        question = u"".join([line['words'].strip() for line in lines]).encode('utf-8')
 
-        question = re.sub(r'^\d\.', "", question)
+        question = re.sub(r'^\d+\.', "", question)
 
         question_block = {
             "question": question,
@@ -68,7 +68,7 @@ class BaiduClondOcr(object):
             "ans_3": ans_3.replace('c.', ''),
         }
 
-        if len(lines) > 3:
+        if len(lines) > 3 or question.startswith('时间到'):
             raise PipelineException('Invalid ocr', question_block)
 
         self.print_questions(question_block)
