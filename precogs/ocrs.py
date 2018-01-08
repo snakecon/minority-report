@@ -11,6 +11,7 @@ Authors: Snakecon (snakecon@gmail.com)
 """
 import io
 
+import re
 from PIL import Image
 from aip import AipOcr
 
@@ -57,6 +58,8 @@ class BaiduClondOcr(object):
         del lines[-1]
 
         question = u" ".join([line['words'].strip() for line in lines]).encode('utf-8')
+
+        question = re.sub(r'^\d\.', "", question)
 
         question_block = {
             "question": question,

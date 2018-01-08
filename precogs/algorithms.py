@@ -113,8 +113,7 @@ class BasicRanker(object):
     def _serach_with_cache(self, q_list, num):
         cache_key = " ".join(q_list)
         if cache_key in self.cache:
-            print "Cache hit, key: %s" % cache_key
-            return self.cache[cache_key]
+            raise PipelineException("Cache hit, key: %s" % cache_key)
 
         result = self.search_engine.search(q_list, num)
         self.cache[cache_key] = result

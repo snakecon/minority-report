@@ -28,6 +28,8 @@ def main():
                         help="Whether to touch screen.")
     parser.add_argument("--once", type="bool", default=False,
                         help="Whether to touch screen.")
+    parser.add_argument("--puzzle", type="bool", default=False,
+                        help="Whether to sync puzzle.")
     parser.add_argument("--precog", type=str, default="Dash",
                         help="Agatha | Arthur | Dash for different precogs(SearchEngine for now.).")
 
