@@ -40,7 +40,7 @@ class BasicRanker(object):
             self.search_engine = Bing(flags)
         elif precog == "dash":
             self.search_engine = BaiduWireless(flags)
-        elif precog == "baidu":
+        elif precog == "dash2":
             self.search_engine = Baidu(flags)
         else:
             raise PipelineException("Invalid precog", precog)
@@ -160,11 +160,12 @@ if __name__ == "__main__":
     class Flag(object):
         def __init__(self):
             self.precog = 'Dash'
-            self.debug = True
+            self.debug = False
     ranker = BasicRanker(Flag())
     ranker.benchmark()
 
     # Benchmark:
-    # Precog: Dash, Total: 290, Correct: 218, Acc: 0.751724
     # Precog: Arthur, Total: 290, Correct: 212, Acc: 0.731034
+    # Precog: Dash, Total: 290, Correct: 218, Acc: 0.751724
+    # Precog: Dash2, Total: 290, Correct: 219, Acc: 0.755172
     # Precog: Agatha, Total: 55, Correct: 43, Acc: 0.781818
