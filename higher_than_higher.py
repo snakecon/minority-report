@@ -38,9 +38,15 @@ WECHAT_TOKEN = os.getenv('WECHAT_TOKEN', 'wechat_token')
 WECHAT_AES_KEY = os.getenv('WECHAT_AES_KEY', '')
 WECHAT_APPID = os.getenv('WECHAT_APPID', '')
 
+<<<<<<< HEAD
 OCR_APPID = os.getenv('OCR_APPID', '')
 OCR_API_KEY = os.getenv('OCR_API_KEY', '')
 OCR_SECRET_KEY = os.getenv('OCR_SECRET_KEY', '')
+=======
+OCR_APPID = os.getenv('OCR_APPID', '10637074')
+OCR_API_KEY = os.getenv('OCR_API_KEY', '6sTsfi71CdGQG5l82cYREQyF')
+OCR_SECRET_KEY = os.getenv('OCR_SECRET_KEY', '4kTQR54X1FtwcwNd7s1eHHTBhyZ5hyML')
+>>>>>>> d7aa879ab7cb12e185bbdc019125c6c306be5e7e
 
 app = Flask(__name__)
 
@@ -109,10 +115,23 @@ def process_image(image_url):
     img = cv2.imdecode(np.asarray(bytearray(urllib.urlopen(image_url).read()), dtype='uint8'), cv2.IMREAD_GRAYSCALE)
     ret, img =cv2.threshold(img, 215, 255, cv2.THRESH_BINARY)
     
+<<<<<<< HEAD
     ocr_client = AipOcr(OCR_APPID, OCR_API_KEY, OCR_SECRET_KEY)
     result = ocr_client.general(cv2.imencode('.jpg', img)[1].tostring(), { 'probability': 'true' })
     
     words_result = filter(lambda x: x['location']['top'] > 300 and x['location']['top'] < 1400, result['words_result'])
+=======
+#    with open('temp.jpg', 'w') as t:
+#        t.write(cv2.imencode('.jpg', img)[1].tostring())
+    
+    ocr_client = AipOcr(OCR_APPID, OCR_API_KEY, OCR_SECRET_KEY)
+    result = ocr_client.general(cv2.imencode('.jpg', img)[1].tostring(), { 'probability': 'true' })
+    
+#    print >> sys.stderr, json.dumps(result, encoding='utf-8', ensure_ascii=False)
+    
+    words_result = filter(lambda x: x['location']['top'] > 300 and x['location']['top'] < 1400, result['words_result'])
+#    print >> sys.stderr, json.dumps(words_result, encoding='utf-8', ensure_ascii=False)
+>>>>>>> d7aa879ab7cb12e185bbdc019125c6c306be5e7e
 
     question = ''.join([word['words'] for word in words_result[:-3]]).split('.')[-1]
     answers = [word['words'].split('.')[-1] for word in words_result[-3:]]
@@ -124,6 +143,11 @@ def process_image(image_url):
         'ans_3': re.sub(ur"[%s]" % hanzi.punctuation, "", answers[2]).encode('utf-8')
     }
     
+<<<<<<< HEAD
+=======
+#    print >> sys.stderr, json.dumps(problem, encoding='utf-8', ensure_ascii=False)
+    
+>>>>>>> d7aa879ab7cb12e185bbdc019125c6c306be5e7e
     return problem    
     
 
@@ -134,7 +158,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.register("type", "bool", lambda v: v.lower() == "true")
     parser.add_argument("--precog", type=str, default="Baidu",
+<<<<<<< HEAD
                         help="Agatha | Arthur | Dash | Baidu for different precogs(SearchEngine for now.).")
+=======
+                        help="Agatha | Arthur | Dash for different precogs(SearchEngine for now.).")
+>>>>>>> d7aa879ab7cb12e185bbdc019125c6c306be5e7e
     parser.add_argument("--debug", type="bool", default=False,
                         help="Whether to enable debug mode.")
     FLAGS, unparsed = parser.parse_known_args()
@@ -142,3 +170,7 @@ if __name__ == '__main__':
     RANKER = algorithms.BasicRanker(FLAGS)
     app.run(host="0.0.0.0", port=80, debug=True)
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> d7aa879ab7cb12e185bbdc019125c6c306be5e7e

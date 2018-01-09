@@ -81,7 +81,7 @@ class BasicRanker(object):
 
         sorted_results.sort(key=lambda x: x["count"], reverse=reverse)
 
-        # If there's a tie redo with answers in q
+       # If there's a tie redo with answers in q
         if sorted_results[0]["count"] == sorted_results[1]["count"]:
             print "Running tiebreaker..."
 
