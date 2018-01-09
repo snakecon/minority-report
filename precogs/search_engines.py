@@ -46,7 +46,27 @@ class BaiduWireless(SearchEngine):
         text = u" ".join([span.get_text() for span in spans]).lower().encode('utf-8').strip()
 
         return text
+    
+class Baidu(SearchEngine):
+    def __init__(self, flags):
+        self.flags = flags
 
+    def search(self, q_list, num):
+        params = {"wd": " ".join(q_list), "num": num}
+        url_params = urllib.urlencode(params)
+
+        baidu_url = "http://www.baidu.com/s?" + url_params
+
+        r = requests.get(baidu_url)
+        if self.flags.debug:
+            print r.text
+
+        soup = BeautifulSoup(r.text, "lxml")
+        spans = soup.find_all('div', {'class': 'c-abstract'})
+
+        text = u" ".join([span.get_text() for span in spans]).lower().encode('utf-8').strip()
+
+        return text
 
 class Google(SearchEngine):
     def __init__(self, flags):
