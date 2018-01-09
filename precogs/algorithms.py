@@ -9,7 +9,11 @@ The algorithm module, used for preprocess text and ranking answers.
 
 Authors: Snakecon (snakecon@gmail.com)
 """
+import random
+from time import sleep
+
 from precogs.exceptions import PipelineException
+from precogs.puzzles import Puzzle
 from precogs.search_engines import BaiduWireless
 from precogs.search_engines import Bing
 from precogs.search_engines import Google
@@ -119,3 +123,41 @@ class BasicRanker(object):
         self.cache[cache_key] = result
 
         return result
+
+    def benchmark(self):
+        puzzle_set = Puzzle(self.flags)
+
+        total = 0
+        corrent = 0
+        for puzzle in puzzle_set.puzzles:
+            try:
+                if u'index' in puzzle and u'ans_1' in puzzle and u'ans_2' in puzzle\
+                        and u'ans_3' in puzzle and u'question' in puzzle:
+                    sleep(5 * random.random())
+
+                    serial_puzzle = {}
+                    for item in [u'question', u'ans_1', u'ans_2', u'ans_3']:
+                        serial_puzzle[item.encode('utf-8')] = puzzle[item].encode('utf-8')
+
+                    result_index = self.rank_answers(serial_puzzle)
+                    label_index = puzzle[u'index']
+
+                    total += 1
+                    if result_index == label_index:
+                        corrent += 1
+                    print "Precog: %s, Total: %d, Correct: %d, Acc: %f" % (self.flags.precog, total, corrent, float(corrent)/ float(total))
+            except PipelineException as e:
+                print e.message
+
+if __name__ == "__main__":
+    class Flag(object):
+        def __init__(self):
+            self.precog = 'Dash'
+            self.debug = True
+    ranker = BasicRanker(Flag())
+    ranker.benchmark()
+
+    # Benchmark:
+    # Precog: Dash, Total: 290, Correct: 218, Acc: 0.751724
+    # Precog: Arthur, Total: 290, Correct: 212, Acc: 0.731034
+    # Precog: Agatha, Total: 55, Correct: 43, Acc: 0.781818
