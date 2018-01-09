@@ -13,6 +13,7 @@ from precogs.exceptions import PipelineException
 from precogs.search_engines import BaiduWireless
 from precogs.search_engines import Bing
 from precogs.search_engines import Google
+from precogs.search_engines import Baidu
 
 __author__ = 'snakecon@gmail.com'
 
@@ -35,12 +36,19 @@ class BasicRanker(object):
             self.search_engine = Bing(flags)
         elif precog == "dash":
             self.search_engine = BaiduWireless(flags)
+        elif precog == "baidu":
+            self.search_engine = Baidu(flags)
         else:
             raise PipelineException("Invalid precog", precog)
 
         self.cache = {}
 
     def rank_answers(self, question_block):
+        results, reverse = self.do_rank_answers(question_block)
+        result_index = self.print_answers(results, reverse)
+        return result_index
+
+    def do_rank_answers(self, question_block):
         print "Rankings answers..."
 
         question = question_block["question"]
@@ -73,7 +81,7 @@ class BasicRanker(object):
 
         sorted_results.sort(key=lambda x: x["count"], reverse=reverse)
 
-        # If there's a tie redo with answers in q
+       # If there's a tie redo with answers in q
         if sorted_results[0]["count"] == sorted_results[1]["count"]:
             print "Running tiebreaker..."
 
@@ -85,8 +93,7 @@ class BasicRanker(object):
                 {"ans": ans_3, "count": text.count(ans_3)}
             ]
 
-        result_index = self.print_answers(results, reverse)
-        return result_index
+        return results, reverse
 
     def print_answers(self, results, reverse):
         print ''
