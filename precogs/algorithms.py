@@ -10,17 +10,19 @@ The algorithm module, used for preprocess text and ranking answers.
 Authors: Snakecon (snakecon@gmail.com)
 """
 import os
-import random
 import pickle
+import random
+import re
+import uniout
 from collections import Counter
 from time import sleep
 
 from precogs.exceptions import PipelineException
 from precogs.puzzles import Puzzle
+from precogs.search_engines import Baidu
 from precogs.search_engines import BaiduWireless
 from precogs.search_engines import Bing
 from precogs.search_engines import Google
-from precogs.search_engines import Baidu
 
 __author__ = 'snakecon@gmail.com'
 
@@ -80,15 +82,15 @@ class BasicRanker(object):
         text = self._serach_with_cache([question], 50)
 
         results = [
-            {"ans": ans_1, "count": text.count(ans_1)},
-            {"ans": ans_2, "count": text.count(ans_2)},
-            {"ans": ans_3, "count": text.count(ans_3)}
+            {"ans": ans_1, "count": self._count(text, ans_1)},
+            {"ans": ans_2, "count": self._count(text, ans_2)},
+            {"ans": ans_3, "count": self._count(text, ans_3)}
         ]
 
         sorted_results = [
-            {"ans": ans_1, "count": text.count(ans_1)},
-            {"ans": ans_2, "count": text.count(ans_2)},
-            {"ans": ans_3, "count": text.count(ans_3)}
+            {"ans": ans_1, "count": self._count(text, ans_1)},
+            {"ans": ans_2, "count": self._count(text, ans_2)},
+            {"ans": ans_3, "count": self._count(text, ans_3)}
         ]
 
         sorted_results.sort(key=lambda x: x["count"], reverse=reverse)
@@ -100,12 +102,25 @@ class BasicRanker(object):
             text = self._serach_with_cache([question, ans_1, ans_2, ans_3], 50)
 
             results = [
-                {"ans": ans_1, "count": text.count(ans_1)},
-                {"ans": ans_2, "count": text.count(ans_2)},
-                {"ans": ans_3, "count": text.count(ans_3)}
+                {"ans": ans_1, "count": self._count(text, ans_1)},
+                {"ans": ans_2, "count": self._count(text, ans_2)},
+                {"ans": ans_3, "count": self._count(text, ans_3)}
             ]
 
         return results, reverse
+
+    def _count(self, text, ans):
+        match_count = 0
+        re_result = re.search(r"是.{0,2}(" + ans + ')', text)
+        if re_result is not None:
+            match_count = len(re_result.groups())
+
+        neg_match = 0
+        re_result = re.search(r"不是.{0,2}(" + ans + ')', text)
+        if re_result is not None:
+            neg_match = len(re_result.groups())
+
+        return text.count(ans) + 10 * match_count - 10 * neg_match
 
     def print_answers(self, results, reverse):
         print ''
@@ -145,7 +160,10 @@ class BasicRanker(object):
 
         total = 0
         corrent = 0
-        for puzzle in puzzle_set.puzzles[:117]:
+
+        wrong_questions = []
+
+        for puzzle in puzzle_set.puzzles[:157]:
             try:
                 if u'index' in puzzle and u'ans_1' in puzzle and u'ans_2' in puzzle\
                         and u'ans_3' in puzzle and u'question' in puzzle:
@@ -164,6 +182,9 @@ class BasicRanker(object):
                     print "Question: %s, Correct: %s" % (puzzle[u'question'].encode('utf-8'), result_index == label_index)
                     print "Precog: %s, Total: %d, Correct: %d, Acc: %f" % (self.flags.precog, total, corrent, float(corrent)/ float(total))
 
+                    if result_index != label_index:
+                        wrong_questions.append(puzzle[u'question'].encode('utf-8'))
+
                     if self.flags.sleep:
                         sleep(9 * random.random())
 
@@ -171,6 +192,9 @@ class BasicRanker(object):
                         self._dump_cache()
             except PipelineException as e:
                 print e.message
+
+        for wrong_question in wrong_questions:
+            print wrong_question
 
     def benchmark_vote(self):
         puzzle_set = Puzzle(self.flags)
@@ -187,7 +211,7 @@ class BasicRanker(object):
 
         total = 0
         corrent = 0
-        for puzzle in puzzle_set.puzzles[:117]:
+        for puzzle in puzzle_set.puzzles[:517]:
             try:
                 if u'index' in puzzle and u'ans_1' in puzzle and u'ans_2' in puzzle\
                         and u'ans_3' in puzzle and u'question' in puzzle:
@@ -234,7 +258,7 @@ if __name__ == "__main__":
             self.dump_cache = False
             self.sleep = False
     ranker = BasicRanker(Flag())
-    if True:
+    if False:
         ranker.benchmark_vote()
     else:
         ranker.benchmark()
