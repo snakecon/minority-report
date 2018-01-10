@@ -115,6 +115,7 @@ class BasicRanker(object):
 
     def _count(self, text, ans):
         total_score = 0
+        total_len = 0
 
         # Rule score.
         # match_count = 0
@@ -130,12 +131,14 @@ class BasicRanker(object):
         # total_score -= 10 * neg_match
 
         # Whole ans score.
-        total_score += text.count(ans)
+        total_score += len(ans) * text.count(ans)
+        total_len += len(ans)
 
         # Tags score.
         terms = jieba.analyse.extract_tags(ans, topK=3)
         for term in terms:
-            total_score += text.count(term.encode('utf-8'))
+            total_score += len(term) * text.count(term.encode('utf-8'))
+            total_len += len(term)
 
         # Calculate average score.
         return float(total_score) / float(len(terms) + 1)
@@ -291,3 +294,5 @@ if __name__ == "__main__":
     # Benchmark II:
     # Original -- Precog: dash2, Total: 300, Correct: 230, Acc: 0.766667
     # The tags -- Precog: dash2, Total: 300, Correct: 236, Acc: 0.786667
+    # The tags2 -- Precog: dash2, Total: 300, Correct: 238, Acc: 0.793333
+    # The tags3 -- Precog: dash2, Total: 300, Correct: 243, Acc: 0.810000
