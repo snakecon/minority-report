@@ -14,6 +14,8 @@ import pickle
 import random
 import re
 import uniout
+import jieba
+import jieba.analyse
 from collections import Counter
 from time import sleep
 
@@ -49,6 +51,8 @@ class BasicRanker(object):
             self.search_engine = Baidu(flags)
         else:
             raise PipelineException("Invalid precog", precog)
+
+        jieba.initialize()
 
         self.cache = {}
         self.cache_data_path = 'data/cache.pickle'
@@ -110,17 +114,31 @@ class BasicRanker(object):
         return results, reverse
 
     def _count(self, text, ans):
-        match_count = 0
-        re_result = re.search(r"是.{0,2}(" + ans + ')', text)
-        if re_result is not None:
-            match_count = len(re_result.groups())
+        total_score = 0
 
-        neg_match = 0
-        re_result = re.search(r"不是.{0,2}(" + ans + ')', text)
-        if re_result is not None:
-            neg_match = len(re_result.groups())
+        # Rule score.
+        # match_count = 0
+        # re_result = re.search(r"是.{0,2}(" + ans + ')', text)
+        # if re_result is not None:
+        #     match_count = len(re_result.groups())
+        #
+        # neg_match = 0
+        # re_result = re.search(r"不是.{0,2}(" + ans + ')', text)
+        # if re_result is not None:
+        #     neg_match = len(re_result.groups())
+        # total_score += 10 * match_count
+        # total_score -= 10 * neg_match
 
-        return text.count(ans) + 10 * match_count - 10 * neg_match
+        # Whole ans score.
+        total_score += text.count(ans)
+
+        # Tags score.
+        terms = jieba.analyse.extract_tags(ans, topK=3)
+        for term in terms:
+            total_score += text.count(term.encode('utf-8'))
+
+        # Calculate average score.
+        return float(total_score) / float(len(terms) + 1)
 
     def print_answers(self, results, reverse):
         print ''
@@ -163,7 +181,7 @@ class BasicRanker(object):
 
         wrong_questions = []
 
-        for puzzle in puzzle_set.puzzles[:157]:
+        for puzzle in puzzle_set.puzzles:
             try:
                 if u'index' in puzzle and u'ans_1' in puzzle and u'ans_2' in puzzle\
                         and u'ans_3' in puzzle and u'question' in puzzle:
@@ -269,3 +287,7 @@ if __name__ == "__main__":
     # Precog: Dash, Total: 55, Correct: 43, Acc: 0.781818
     # Precog: dash2, Total: 55, Correct: 42, Acc: 0.763636
     # Precog: dash2 + Dash + arthur, Total: 55, Correct: 43, Acc: 0.781818
+
+    # Benchmark II:
+    # Original -- Precog: dash2, Total: 300, Correct: 230, Acc: 0.766667
+    # The tags -- Precog: dash2, Total: 300, Correct: 236, Acc: 0.786667
