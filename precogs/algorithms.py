@@ -9,7 +9,9 @@ The algorithm module, used for preprocess text and ranking answers.
 
 Authors: Snakecon (snakecon@gmail.com)
 """
+import os
 import random
+import pickle
 from time import sleep
 
 from precogs.exceptions import PipelineException
@@ -46,6 +48,11 @@ class BasicRanker(object):
             raise PipelineException("Invalid precog", precog)
 
         self.cache = {}
+        self.cache_data_path = 'data/cache.pickle'
+        if os.path.exists(self.cache_data_path):
+            print "Load cache..."
+            with open(self.cache_data_path, 'r') as cache_file:
+                self.cache = pickle.load(cache_file)
 
     def rank_answers(self, question_block):
         results, reverse = self.do_rank_answers(question_block)
@@ -122,9 +129,9 @@ class BasicRanker(object):
         return result_index
 
     def _serach_with_cache(self, q_list, num):
-        cache_key = " ".join(q_list)
+        cache_key = " ".join([self.flags.precog] + q_list)
         if cache_key in self.cache:
-            raise PipelineException("Cache hit, key: %s" % cache_key)
+            return self.cache[cache_key]
 
         result = self.search_engine.search(q_list, num)
         self.cache[cache_key] = result
@@ -140,7 +147,7 @@ class BasicRanker(object):
             try:
                 if u'index' in puzzle and u'ans_1' in puzzle and u'ans_2' in puzzle\
                         and u'ans_3' in puzzle and u'question' in puzzle:
-                    sleep(5 * random.random())
+                    sleep(2 * random.random())
 
                     serial_puzzle = {}
                     for item in [u'question', u'ans_1', u'ans_2', u'ans_3']:
@@ -152,15 +159,25 @@ class BasicRanker(object):
                     total += 1
                     if result_index == label_index:
                         corrent += 1
+
+                    print "Question: %s" % puzzle[u'question'].encode('utf-8')
                     print "Precog: %s, Total: %d, Correct: %d, Acc: %f" % (self.flags.precog, total, corrent, float(corrent)/ float(total))
+                    if self.flags.dump_cache:
+                        self._dump_cache()
             except PipelineException as e:
                 print e.message
+
+    def _dump_cache(self):
+        with open(self.cache_data_path, 'w') as cache_file:
+            pickle.dump(self.cache, cache_file)
+
 
 if __name__ == "__main__":
     class Flag(object):
         def __init__(self):
-            self.precog = 'Dash'
+            self.precog = 'arthur'
             self.debug = False
+            self.dump_cache = False
     ranker = BasicRanker(Flag())
     ranker.benchmark()
 
