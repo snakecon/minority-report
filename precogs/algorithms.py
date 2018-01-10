@@ -12,6 +12,7 @@ Authors: Snakecon (snakecon@gmail.com)
 import os
 import random
 import pickle
+from collections import Counter
 from time import sleep
 
 from precogs.exceptions import PipelineException
@@ -131,6 +132,7 @@ class BasicRanker(object):
     def _serach_with_cache(self, q_list, num):
         cache_key = " ".join([self.flags.precog] + q_list)
         if cache_key in self.cache:
+            print "Hit cache"
             return self.cache[cache_key]
 
         result = self.search_engine.search(q_list, num)
@@ -143,11 +145,10 @@ class BasicRanker(object):
 
         total = 0
         corrent = 0
-        for puzzle in puzzle_set.puzzles:
+        for puzzle in puzzle_set.puzzles[:117]:
             try:
                 if u'index' in puzzle and u'ans_1' in puzzle and u'ans_2' in puzzle\
                         and u'ans_3' in puzzle and u'question' in puzzle:
-                    sleep(2 * random.random())
 
                     serial_puzzle = {}
                     for item in [u'question', u'ans_1', u'ans_2', u'ans_3']:
@@ -160,8 +161,61 @@ class BasicRanker(object):
                     if result_index == label_index:
                         corrent += 1
 
-                    print "Question: %s" % puzzle[u'question'].encode('utf-8')
+                    print "Question: %s, Correct: %s" % (puzzle[u'question'].encode('utf-8'), result_index == label_index)
                     print "Precog: %s, Total: %d, Correct: %d, Acc: %f" % (self.flags.precog, total, corrent, float(corrent)/ float(total))
+
+                    if self.flags.sleep:
+                        sleep(9 * random.random())
+
+                    if self.flags.dump_cache:
+                        self._dump_cache()
+            except PipelineException as e:
+                print e.message
+
+    def benchmark_vote(self):
+        puzzle_set = Puzzle(self.flags)
+
+        flag1 = Flag()
+        flag1.precog = 'arthur'
+        v1 = BasicRanker(flag1)
+        flag2 = Flag()
+        flag2.precog = 'Dash'
+        v2 = BasicRanker(flag2)
+        flag3 = Flag()
+        flag3.precog = 'dash2'
+        v3 = BasicRanker(flag3)
+
+        total = 0
+        corrent = 0
+        for puzzle in puzzle_set.puzzles[:117]:
+            try:
+                if u'index' in puzzle and u'ans_1' in puzzle and u'ans_2' in puzzle\
+                        and u'ans_3' in puzzle and u'question' in puzzle:
+                    serial_puzzle = {}
+                    for item in [u'question', u'ans_1', u'ans_2', u'ans_3']:
+                        serial_puzzle[item.encode('utf-8')] = puzzle[item].encode('utf-8')
+
+                    result_index1 = v1.rank_answers(serial_puzzle)
+                    result_index2 = v2.rank_answers(serial_puzzle)
+                    result_index3 = v3.rank_answers(serial_puzzle)
+
+                    result_index = Counter([result_index1, result_index2, result_index3]).most_common(1)[0][0]
+
+                    if result_index != result_index3:
+                        print "Not baiduwireless"
+
+                    label_index = puzzle[u'index']
+
+                    total += 1
+                    if result_index == label_index:
+                        corrent += 1
+
+                    print "Question: %s, Correct: %s" % (puzzle[u'question'].encode('utf-8'), result_index == label_index)
+                    print "Precog: %s, Total: %d, Correct: %d, Acc: %f" % ('dash2 + Dash + arthur', total, corrent, float(corrent)/ float(total))
+
+                    if self.flags.sleep:
+                        sleep(2 * random.random())
+
                     if self.flags.dump_cache:
                         self._dump_cache()
             except PipelineException as e:
@@ -175,14 +229,19 @@ class BasicRanker(object):
 if __name__ == "__main__":
     class Flag(object):
         def __init__(self):
-            self.precog = 'arthur'
+            self.precog = 'dash2'
             self.debug = False
             self.dump_cache = False
+            self.sleep = False
     ranker = BasicRanker(Flag())
-    ranker.benchmark()
+    if True:
+        ranker.benchmark_vote()
+    else:
+        ranker.benchmark()
 
     # Benchmark:
-    # Precog: Arthur, Total: 290, Correct: 212, Acc: 0.731034
-    # Precog: Dash, Total: 290, Correct: 218, Acc: 0.751724
-    # Precog: Dash2, Total: 290, Correct: 219, Acc: 0.755172
     # Precog: Agatha, Total: 55, Correct: 43, Acc: 0.781818
+    # Precog: arthur, Total: 55, Correct: 35, Acc: 0.636364
+    # Precog: Dash, Total: 55, Correct: 43, Acc: 0.781818
+    # Precog: dash2, Total: 55, Correct: 42, Acc: 0.763636
+    # Precog: dash2 + Dash + arthur, Total: 55, Correct: 43, Acc: 0.781818
