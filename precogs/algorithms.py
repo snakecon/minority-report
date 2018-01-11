@@ -131,17 +131,20 @@ class BasicRanker(object):
         # total_score -= 10 * neg_match
 
         # Whole ans score.
-        total_score += len(ans) * text.count(ans)
-        total_len += len(ans)
+        # total_score += len(ans) * text.count(ans)
+        # total_len += len(ans)
+        h_param = 3.5
 
+        whole_score = text.count(ans)
         # Tags score.
         terms = jieba.analyse.extract_tags(ans, topK=3)
         for term in terms:
-            total_score += len(term) * text.count(term.encode('utf-8'))
-            total_len += len(term)
+            total_score += text.count(term.encode('utf-8'))
 
         # Calculate average score.
-        return float(total_score) / float(len(terms) + 1)
+        if len(terms) == 0:
+            return h_param * whole_score
+        return h_param * whole_score + float(total_score) / float(len(terms))
 
     def print_answers(self, results, reverse):
         print ''
@@ -276,8 +279,8 @@ if __name__ == "__main__":
         def __init__(self):
             self.precog = 'dash2'
             self.debug = False
-            self.dump_cache = True
-            self.sleep = True
+            self.dump_cache = False
+            self.sleep = False
     ranker = BasicRanker(Flag())
     if False:
         ranker.benchmark_vote()
@@ -296,3 +299,5 @@ if __name__ == "__main__":
     # The tags -- Precog: dash2, Total: 300, Correct: 236, Acc: 0.786667
     # The tags2 -- Precog: dash2, Total: 300, Correct: 238, Acc: 0.793333
     # The tags3 -- Precog: dash2, Total: 300, Correct: 243, Acc: 0.810000
+    # The tags4 -- Precog: dash2, Total: 300, Correct: 248, Acc: 0.826667
+
