@@ -276,8 +276,8 @@ if __name__ == "__main__":
         def __init__(self):
             self.precog = 'dash2'
             self.debug = False
-            self.dump_cache = False
-            self.sleep = False
+            self.dump_cache = True
+            self.sleep = True
     ranker = BasicRanker(Flag())
     if False:
         ranker.benchmark_vote()
